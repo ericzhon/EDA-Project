@@ -1,0 +1,155 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from google.colab import files
+uploaded = files.upload()
+
+mj = pd.read_csv('mj.csv')
+
+mjFrame = pd.DataFrame(mj)
+mjFrame.rename(columns = {'EndYear' : 'Season'}, inplace = True)
+mjFrame = mjFrame.set_index('Season')
+print(mjFrame)
+
+#Average points per game by season (bar chart)
+avgPpg = mjFrame.groupby('Season')['PTS'].mean()
+
+ax1 = avgPpg.plot.bar(x = 'Season', y = 'PTS')
+plt.title('Average Points Per Game by Season')
+plt.ylabel('Points Per Game')
+
+#Average game score per game by season (bar chart)
+avgGmscore = mjFrame.groupby('Season')['GmSc'].mean()
+
+ax2 = avgGmscore.plot.bar(x = 'Season', y = 'GmSc')
+plt.title('Average Game Score Per Game by Season')
+plt.ylabel('Game Score Per Game')
+
+#Number of games over 30 points by season (bar chart)
+point30 = mjFrame.PTS >= 30
+mjFrame['30PTS'] = point30
+
+point30Frame = mjFrame.groupby('Season')['30PTS'].sum()
+
+ax3 = point30Frame.plot.bar(x = 'Season', y = '30PTS')
+plt.title('Number of 30 Point Games by Season')
+plt.ylabel('30 Point Games')
+
+#Number of games over 35 game score by season (bar chart)
+gameScore35 = mjFrame.GmSc >= 35
+mjFrame['35GmSc'] = gameScore35
+
+gameScore35Frame = mjFrame.groupby('Season')['35GmSc'].sum()
+
+ax4 = gameScore35Frame.plot.bar(x = 'Season', y = 'GmSc')
+plt.title('Number of Games over Game Score of 35 by Season')
+plt.ylabel('35 Game Score Games')
+
+#Points per game scored vs point differential (scatter plot)
+fig = plt.figure()
+ax5 = fig.add_subplot(1,1,1)
+
+championFrame = pd.DataFrame(mjFrame, columns = ['PTS', 'GmSc', 'Diff'])
+
+
+champPts13 = championFrame.iloc[428:667, 0] 
+champPts68 = championFrame.iloc[684:930, 0]
+champPts = champPts13.append(champPts68)
+
+
+diff13 = championFrame.iloc[428:667, 2] 
+diff68 = championFrame.iloc[684:930, 2] 
+diffTotal = diff13.append(diff68)
+
+
+ax5.scatter(diffTotal, champPts)
+ax5.set_ylabel("Points Per Game")
+ax5.set_xlabel("Point Differential")
+ax5.set_title("Points Per Game vs. Point Differential (Championship Seasons)")
+
+plt.show()
+
+#Game score per game vs point differential (scatter plot)
+fig = plt.figure()
+ax6 = fig.add_subplot(1,1,1)
+
+champGmSc13 = championFrame.iloc[428:667, 1] 
+champGmSc68 = championFrame.iloc[684:930, 1]
+champGmSc = champGmSc13.append(champGmSc68)
+
+
+diff13 = championFrame.iloc[428:667, 2] 
+diff68 = championFrame.iloc[684:930, 2] 
+diffTotal = diff13.append(diff68)
+
+
+ax6.scatter(diffTotal, champGmSc)
+ax6.set_ylabel("Game Score Per Game")
+ax6.set_xlabel("Point Differential")
+ax6.set_title("Game Score Per Game vs. Point Differential (Championship Seasons)")
+
+plt.show()
+
+#Number of 3-pointers attempted vs points per game (scatter plot)
+fig = plt.figure()
+ax7 = fig.add_subplot(1,1,1)
+
+avg3PA = mjFrame.groupby('Season')['3PA'].mean()
+
+ax7.scatter(avg3PA, avgPpg)
+ax7.set_title("Average 3-Pointers Attempted Per Game vs. Average Points Per Game")
+ax7.set_ylabel("Points Per Game")
+ax7.set_xlabel("3-Pointers Attempted Per Game")
+
+#Number of 3-pointers attempted vs percentage of 3-pointers made (scatter plot)
+fig = plt.figure()
+ax8 = fig.add_subplot(1,1,1)
+
+avg3Percent = mjFrame.groupby('Season')['3P_PCT'].mean()
+
+ax8.scatter(avg3PA, avg3Percent)
+ax8.set_title("Average 3-Pointers Attempted Per Game vs. Average 3-Pointers Made %")
+ax8.set_ylabel("3-Pointers Made %")
+ax8.set_xlabel("3-Pointers Attempted Per Game")
+ax8.set_yticklabels(["5%", "10%", "15%", "20%", "25%", "30%", "35%", "40%", "45%", "50%"])
+
+#Average ppg on Bulls vs avg ppg on Wizards (bar plot)
+bullsPpg = championFrame.iloc[0:930, 0]
+bullsPpg = bullsPpg.mean()
+#print(bullsPpg)
+
+wizardsPpg = championFrame.iloc[930:, 0]
+wizardsPpg = wizardsPpg.mean()
+#print(wizardsPpg)
+
+teams = ['Bulls', 'Wizards']
+teamPpg = [bullsPpg, wizardsPpg]
+
+fig = plt.figure()
+ax9 = fig.add_axes([0,0,1,1])
+
+plt.bar(teams, teamPpg, color=['red', 'blue'])
+ax9.set_xlabel("Jordan's Teams")
+ax9.set_ylabel("Points Per Game")
+ax9.set_title("Points Per Game by Team")
+
+#Average game score per game on Bulls vs avg game score per game on Wizards (bar plot)
+bullsGmSc = championFrame.iloc[0:930, 1]
+bullsGmSc = bullsGmSc.mean()
+#print(bullsPpg)
+
+wizardsGmSc = championFrame.iloc[930:, 1]
+wizardsGmSc = wizardsGmSc.mean()
+#print(wizardsPpg)
+
+teams = ['Bulls', 'Wizards']
+teamGmSc = [bullsGmSc, wizardsGmSc]
+
+fig = plt.figure()
+ax10 = fig.add_axes([0,0,1,1])
+
+plt.bar(teams, teamGmSc, color=['red', 'blue'])
+ax10.set_xlabel("Jordan's Teams")
+ax10.set_ylabel("Game Score Per Game")
+ax10.set_title("Game Score Per Game by Team")
